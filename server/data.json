@@ -1,0 +1,22 @@
+{
+    "companies": [
+        {
+            "name": "Senukai",
+            "code": "111111",
+            "pvm": "LT215161",
+            "address": "Vilniaus g. 31",
+            "email": "senukai@senukai.lt",
+            "phone": "222222",
+            "country": "Lietuva"
+        },
+        {
+            "name": "depo",
+            "code": "222222",
+            "pvm": "LT21321312",
+            "address": "Kauno g. 22",
+            "email": "depo@depo.lt",
+            "phone": "3333333",
+            "country": "Lietuva"
+        }
+    ]
+}
