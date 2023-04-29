@@ -1,14 +1,24 @@
 <template>
     <v-form class="form">
-        <v-autocomplete label="Pavadinimas" v-model="selectedName" hide-no-data :items="filteredNames"
-            @input="handleNameInput"></v-autocomplete>
-        <v-autocomplete label="Įmonės kodas" v-model="selectedCode" hide-no-data :items="filteredCodes"
-            @input="handleCodeInput"></v-autocomplete>
-        <v-text-field size="20" label="PVM kodas" v-model="formData.pvm"></v-text-field>
-        <v-text-field size="20" label="Adresas" v-model="formData.address"></v-text-field>
-        <v-text-field size="20" label="El. paštas" v-model="formData.email"></v-text-field>
-        <v-text-field size="20" label="Telefonas" v-model="formData.phone"></v-text-field>
-        <v-text-field size="20" label="Šalis" v-model="formData.country"></v-text-field>
+        <v-text-field label="Pavadinimas" v-model="selectedName" hide-no-data hide-details
+            :items="filteredNames" @input="handleNameInput" @focus="nameModal = true"></v-text-field>
+        <div v-if="filteredNames && nameModal">
+            <ul class="list">
+                <li v-for="name in filteredNames" @click="setName(name)" :key="name">{{ name }}</li>
+            </ul>
+        </div>
+        <v-text-field label="Įmonės kodas" v-model="selectedCode" hide-no-data hide-details :items="filteredCodes"
+            @input="handleCodeInput" @focus="codeModal = true"></v-text-field>
+        <div v-if="filteredCodes && codeModal">
+            <ul class="list">
+                <li v-for="code in filteredCodes" @click="setCode(code)" :key="code">{{ code }}</li>
+            </ul>
+        </div>
+        <v-text-field size="20" label="PVM kodas" v-model="formData.pvm" hide-details></v-text-field>
+        <v-text-field size="20" label="Adresas" v-model="formData.address" hide-details></v-text-field>
+        <v-text-field size="20" label="El. paštas" v-model="formData.email" hide-details></v-text-field>
+        <v-text-field size="20" label="Telefonas" v-model="formData.phone" hide-details></v-text-field>
+        <v-text-field size="20" label="Šalis" v-model="formData.country" hide-details></v-text-field>
     </v-form>
 </template>
 
@@ -18,10 +28,10 @@ import axios from 'axios';
 export default {
     data() {
         return {
+            nameModal: false,
+            codeModal: false,
             selectedName: "",
             selectedCode: "",
-            names: [],
-            codes: [],
             companies: [],
             formData: {
                 name: "",
@@ -34,10 +44,9 @@ export default {
             }
         }
     },
-    mounted() {
-        axios.get("http://localhost:3000/companies")
-            .then(response => this.companies = response.data).catch(error => console.log(error))
-    },
+    // mounted() {
+    //     axios.get("http://localhost:3000/companies").then(response => this.companies = response.data)
+    // },
     computed: {
         filteredNames() {
             return this.companies.map(company => company.name)
@@ -47,7 +56,16 @@ export default {
         }
     },
     methods: {
-        handleNameInput() {
+        setName(name) {
+            this.selectedName = name;
+            this.nameModal = false;
+        },
+        setCode(code) {
+            this.selectedCode = code;
+            this.codeModal = false;
+        },
+        async handleNameInput() {
+            await axios.get(`http://localhost:3000/companies?q=${this.selectedName}`).then(response => this.companies = response.data)
             const selectedCompany = this.companies.find(company => company.name === this.selectedName);
 
             if (selectedCompany) {
@@ -59,8 +77,10 @@ export default {
                 this.formData.phone = selectedCompany.phone;
                 this.formData.country = selectedCompany.country;
             }
+
         },
-        handleCodeInput() {
+        async handleCodeInput() {
+            await axios.get(`http://localhost:3000/companies?q=${this.selectedCode}`).then(response => this.companies = response.data)
             const selectedCompany = this.companies.find(company => company.code === this.selectedCode);
 
             if (selectedCompany) {
@@ -72,6 +92,7 @@ export default {
                 this.formData.phone = selectedCompany.phone;
                 this.formData.country = selectedCompany.country;
             }
+
         },
     },
     watch: {
@@ -86,3 +107,15 @@ export default {
 }
 
 </script>
+
+<style>
+.list {
+    list-style-type: none;
+    z-index: 999;
+}
+
+.list li {
+    padding: 10px;
+    padding-left: 16px;
+}
+</style>
